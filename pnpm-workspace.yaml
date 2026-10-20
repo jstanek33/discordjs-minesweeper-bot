@@ -1,0 +1,9 @@
+dedupePeers: true
+minimumReleaseAge: 1440 # 1 day
+publicHoistPattern:
+  - "*typescript*"
+resolutionMode: highest
+updateNotifier: false
+
+allowBuilds:
+  lefthook: true

@@ -1,0 +1,23 @@
+commit-msg:
+  commands:
+    commitlint:
+      run: pnpm exec commitlint --edit {1}
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      glob: "*.{ts,tsx,js,jsx,json,css,md,svelte}"
+      run: pnpm exec oxfmt --write {staged_files}
+      stage_fixed: true
+    lint:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: pnpm lint {staged_files}
+      stage_fixed: true
+pre-push:
+  parallel: true
+  commands:
+    knip:
+      run: pnpm knip
+    lint-type-aware:
+      glob: "*.{ts,tsx,js,jsx}"
+      run: pnpm lint:type-aware {push_files}

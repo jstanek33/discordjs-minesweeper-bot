@@ -1,0 +1,60 @@
+{
+  "file_scan_exclusions": [
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/.jj",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/Thumbs.db",
+    "**/.classpath",
+    "**/.settings",
+    "**/bower_components",
+    "**/*.code-search"
+  ],
+  "languages": {
+    "TypeScript": {
+      "language_servers": ["!eslint", "tsgo", "vtsls", "!typescript-language-server", "..."],
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "oxfmt" } }, { "code_action": "source.fixAll.oxc" }],
+      "prettier": { "allowed": false }
+    },
+    "TSX": {
+      "language_servers": ["!eslint", "tsgo", "vtsls", "!typescript-language-server", "..."],
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "oxfmt" } }, { "code_action": "source.fixAll.oxc" }],
+      "prettier": { "allowed": false }
+    },
+    "JavaScript": {
+      "language_servers": ["!eslint", "tsgo", "vtsls", "!typescript-language-server", "..."],
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "oxfmt" } }, { "code_action": "source.fixAll.oxc" }],
+      "prettier": { "allowed": false }
+    },
+    "JSON": {
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "oxfmt" } }],
+      "prettier": { "allowed": false }
+    },
+    "JSONC": {
+      "format_on_save": "on",
+      "formatter": [{ "language_server": { "name": "oxfmt" } }],
+      "prettier": { "allowed": false }
+    }
+  },
+  "lsp": {
+    "oxlint": {
+      "initialization_options": {
+        "settings": {
+          "run": "onType",
+          "typeAware": false
+        }
+      }
+    },
+    "oxfmt": {
+      "initialization_options": {
+        "settings": { "run": "onSave" }
+      }
+    }
+  }
+}
