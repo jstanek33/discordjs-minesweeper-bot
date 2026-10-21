@@ -3,8 +3,8 @@ import * as crypto from "node:crypto";
 import { env } from "#env";
 
 const KEY = crypto.createHash("sha256").update(env.GAME_SECRET).digest();
-const IV_LENGTH = 12;
-const TAG_LENGTH = 16;
+const BLOCK = 16;
+const SEED_BYTES = 12;
 
 // mulberry32 prng
 export function seededRandom(seed: string): () => number {
@@ -18,16 +18,26 @@ export function seededRandom(seed: string): () => number {
   };
 }
 
-export function seal(text: string): string {
-  const iv = crypto.randomBytes(IV_LENGTH);
-  const cipher = crypto.createCipheriv("aes-256-gcm", KEY, iv);
-  const data = Buffer.concat([cipher.update(text, "utf8"), cipher.final()]);
-  return Buffer.concat([iv, cipher.getAuthTag(), data]).toString("base64url");
+export function randomSeed(): string {
+  return crypto.randomBytes(SEED_BYTES).toString("base64url");
+}
+
+export function seal(seed: string): string {
+  const bytes = Buffer.from(seed, "base64url");
+
+  if (bytes.length !== SEED_BYTES || bytes.toString("base64url") !== seed) {
+    throw new Error("Only seeds from randomSeed() can be sealed");
+  }
+
+  const cipher = crypto.createCipheriv("aes-256-ecb", KEY, null).setAutoPadding(false);
+  const block = Buffer.concat([bytes, Buffer.alloc(BLOCK - SEED_BYTES)]);
+
+  return Buffer.concat([cipher.update(block), cipher.final()]).toString("base64url");
 }
 
 export function unseal(token: string): string {
-  const raw = Buffer.from(token, "base64url");
-  const decipher = crypto.createDecipheriv("aes-256-gcm", KEY, raw.subarray(0, IV_LENGTH));
-  decipher.setAuthTag(raw.subarray(IV_LENGTH, IV_LENGTH + TAG_LENGTH));
-  return Buffer.concat([decipher.update(raw.subarray(IV_LENGTH + TAG_LENGTH)), decipher.final()]).toString("utf8");
+  const decipher = crypto.createDecipheriv("aes-256-ecb", KEY, null).setAutoPadding(false);
+  const block = Buffer.concat([decipher.update(Buffer.from(token, "base64url")), decipher.final()]);
+
+  return block.subarray(0, SEED_BYTES).toString("base64url");
 }
