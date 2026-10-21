@@ -5,7 +5,7 @@ import type { Status } from "#minesweeper/constants";
 export const BUTTON_PREFIX = "game";
 export const BUTTON_PLACEHOLDER_ID = `${BUTTON_PREFIX}:none`;
 export const SEALED_PREFIX = "🔒";
-export const STORE_CAPACITY = 500;
+export const STORE_CAPACITY = 512;
 
 export const TITLE_PATTERN = /^Saper (?<cols>\d+)x(?<rows>\d+)(?<ranked> RANKED)?$/;
 export const FOOTER_PATTERN = /^Bomby: (?<bombs>\d+) • Seed: (?<seed>\S+)$/;

@@ -1,9 +1,14 @@
-import type { ForumChannel, GuildForumTag } from "discord.js";
+import type { ForumChannel, GuildForumTag, Message } from "discord.js";
 
 import type { Status } from "#minesweeper/constants";
 import { STATUSES } from "#minesweeper/constants";
+import { SerialStore } from "#utils/serial-store";
 
-import { STATUS_TAGS } from "./constants.ts";
+import { STATUS_TAGS, STORE_CAPACITY } from "./constants.ts";
+import { GameForum } from "./forum.ts";
+import { GameMessage } from "./message.ts";
+
+const store = new SerialStore<GameMessage>(STORE_CAPACITY);
 
 export async function ensureTags(channel: ForumChannel): Promise<Record<Status, string>> {
   function findTag(status: Status): GuildForumTag | undefined {
@@ -46,4 +51,38 @@ export async function ensureTags(channel: ForumChannel): Promise<Record<Status, 
 
 export function threadName(username: string): string {
   return `Plansza użytkownika ${username}`;
+}
+
+export function updateGame(message: Message<true>, updater: (game: GameMessage) => boolean): Promise<GameMessage> {
+  return store.update(message.id, async (latest) => {
+    const current = latest ?? GameMessage.fromMessage(message);
+    const next = current.clone();
+
+    if (!updater(next)) {
+      return current;
+    }
+
+    await saveGame(message, next);
+    return next;
+  });
+}
+
+async function saveGame(message: Message<true>, game: GameMessage): Promise<void> {
+  const { status } = game;
+
+  if (status === "playing") {
+    await message.edit(game.toPayload());
+    return;
+  }
+
+  const thread = message.channel;
+  if (!thread.isThread()) {
+    throw new Error("Game message is not in a forum post");
+  }
+
+  const forum = await GameForum.of(message.guild);
+  const count = (await forum.count(thread.name, status)) + 1;
+
+  await message.edit(game.toPayload(count));
+  await forum.close(thread, status);
 }

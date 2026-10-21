@@ -8,6 +8,7 @@ import { UserError } from "#utils/errors";
 
 import { GameMessage } from "./message.ts";
 import { createOptionsSchema } from "./schemas.ts";
+import { updateGame } from "./utils.ts";
 
 export const gameCommand: Command = {
   data: new SlashCommandBuilder()
@@ -87,7 +88,17 @@ async function create(interaction: ChatInputCommandInteraction<"cached">): Promi
   await interaction.editReply(`Plansza gotowa: ${channelMention(thread.id)}`);
 }
 
-async function cancel(_: ChatInputCommandInteraction<"cached">): Promise<void> {
-  // TODO: handle game cancelation
-  throw new Error("TODO: /game cancel");
+async function cancel(interaction: ChatInputCommandInteraction<"cached">): Promise<void> {
+  const { user } = interaction;
+  await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+  const forum = await GameForum.of(interaction.guild);
+  const games = (await forum.activeGames(user.username)).filter(({ game }) => game.players.player === user.id);
+
+  for (const { message } of games) {
+    // oxlint-disable-next-line no-await-in-loop
+    await updateGame(message, (game) => game.state.resign());
+  }
+
+  await interaction.editReply(games.length ? `Poddane plansze: ${games.length}.` : "Nie masz aktywnych plansz.");
 }
