@@ -2,12 +2,14 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
 import { REST, Routes } from "discord.js";
+import * as z from "zod";
 
-import * as commands from "#commands/index";
 import { cwd, env } from "#env";
+import { commands } from "#registry";
 import { sha256 } from "#utils/crypto";
 
 const CACHE_FILE = path.resolve(cwd, ".cache/commands.json");
+const cacheSchema = z.record(z.string(), z.string());
 const force = process.argv.includes("--force");
 
 // oxlint-disable-next-line typescript/explicit-function-return-type -- infer
@@ -27,7 +29,8 @@ function getScope() {
 
 async function getCache(): Promise<Record<string, string>> {
   try {
-    return JSON.parse(await fs.readFile(CACHE_FILE, "utf8")) as Record<string, string>;
+    const raw = await fs.readFile(CACHE_FILE, "utf8");
+    return cacheSchema.parse(JSON.parse(raw));
   } catch {
     return {};
   }
@@ -38,7 +41,7 @@ async function setCache(data: Record<string, string>): Promise<void> {
 }
 
 const scope = getScope();
-const body = Object.values(commands).map((c) => c.data.toJSON());
+const body = commands.map((c) => c.data.toJSON());
 
 if (body.length === 0) {
   throw new Error("No commands found");
@@ -63,3 +66,4 @@ const rest = new REST().setToken(env.CLIENT_SECRET);
 await rest.put(scope.route, { body });
 
 await setCache({ ...cache, [scope.key]: hash });
+console.log(`Registered ${body.length} commands for ${scope.key}.`);

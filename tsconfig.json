@@ -12,6 +12,7 @@
     "verbatimModuleSyntax": true,
     "noUncheckedSideEffectImports": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "allowJs": false,
     "skipLibCheck": true,
     "strict": true,
