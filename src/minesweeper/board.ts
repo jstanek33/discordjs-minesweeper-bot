@@ -1,5 +1,5 @@
 import type { Position } from "#types/utils";
-import { seededRandom } from "#utils/crypto";
+import { seededRandom } from "#utils/seed";
 
 import { SAFE_CELLS } from "./constants.ts";
 

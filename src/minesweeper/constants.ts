@@ -10,7 +10,7 @@ export const SAFE_CELLS: readonly Position[] = [START];
 
 export const SEED_PATTERN = /^[\w-]{1,32}$/;
 
-export const ACTIONS = ["move", "reveal", "flag", "chord"] as const;
+export const ACTIONS = ["move", "reveal", "flag"] as const;
 export type Action = (typeof ACTIONS)[number];
 
 export const STATUSES = ["playing", "won", "lost"] as const;

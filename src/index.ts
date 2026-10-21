@@ -1,5 +1,6 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 
+import { registerInteractions } from "#dispatcher";
 import { env } from "#env";
 
 async function main(): Promise<void> {
@@ -9,6 +10,7 @@ async function main(): Promise<void> {
     console.log(`Bot is up! Logged in as ${c.user.tag}`);
   });
 
+  registerInteractions(client);
   await client.login(env.CLIENT_SECRET);
 }
 

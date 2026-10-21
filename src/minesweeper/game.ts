@@ -25,11 +25,9 @@ export class Game {
     this.cursor = cursor;
   }
 
-  #total(cell: Cell): number {
-    return this.cells.filter((c) => c === cell).length;
-  }
+  #open(start: number): void {
+    const stack = [start];
 
-  #open(stack: number[]): void {
     for (let i = stack.pop(); i !== undefined; i = stack.pop()) {
       if (this.cells[i] !== Cell.Hidden) {
         continue;
@@ -54,6 +52,10 @@ export class Game {
         if (this.board.isMine(i)) this.cells[i] = Cell.Flagged;
       }
     }
+  }
+
+  #total(cell: Cell): number {
+    return this.cells.filter((c) => c === cell).length;
   }
 
   public get status(): Status {
@@ -100,10 +102,7 @@ export class Game {
         this.cells[i] = this.cells[i] === Cell.Flagged ? Cell.Hidden : Cell.Flagged;
         break;
       case "reveal":
-        this.#open([i]);
-        break;
-      case "chord":
-        this.#open([...this.board.neighbors(i)]);
+        this.#open(i);
         break;
     }
 
@@ -122,15 +121,6 @@ export class Game {
       move: () => true,
       reveal: () => cell === Cell.Hidden,
       flag: () => cell !== Cell.Revealed,
-      chord: () => {
-        const around = [...this.board.neighbors(i)].map((n) => this.cells[n]);
-
-        return (
-          cell === Cell.Revealed &&
-          around.filter((c) => c === Cell.Flagged).length === this.board.count(i) &&
-          around.includes(Cell.Hidden)
-        );
-      },
     };
 
     return checks[action]();
