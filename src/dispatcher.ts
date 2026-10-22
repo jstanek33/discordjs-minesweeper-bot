@@ -29,14 +29,17 @@ async function handleInteractionError(interaction: Interaction, error: unknown):
     return;
   }
 
-  const content = expected ? error.message : "Coś poszło nie tak. Spróbuj ponownie.";
+  const content = expected ? error.message : "Coś poszło nie tak. Spróbuj ponownie";
 
   try {
     if (interaction.isChatInputCommand() && interaction.deferred) {
       await interaction.editReply(content);
     } else {
-      const handler = interaction.deferred || interaction.replied ? interaction.followUp : interaction.reply;
-      await handler({ content, flags: MessageFlags.Ephemeral });
+      if (interaction.deferred || interaction.replied) {
+        await interaction.followUp({ content, flags: MessageFlags.Ephemeral });
+      } else {
+        await interaction.reply({ content, flags: MessageFlags.Ephemeral });
+      }
     }
   } catch (err) {
     console.error("Could not report the failure:", err);

@@ -66,4 +66,4 @@ const rest = new REST().setToken(env.CLIENT_SECRET);
 await rest.put(scope.route, { body });
 
 await setCache({ ...cache, [scope.key]: hash });
-console.log(`Registered ${body.length} commands for ${scope.key}.`);
+console.log(`Registered ${body.length} commands for ${scope.key}`);

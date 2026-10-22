@@ -1,12 +1,20 @@
-import type { ForumChannel, Guild, GuildForumThreadMessageCreateOptions, ThreadChannel } from "discord.js";
+import type {
+  ForumChannel,
+  Guild,
+  GuildForumTag,
+  GuildForumThreadMessageCreateOptions,
+  ThreadChannel,
+} from "discord.js";
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
 
 import { env } from "#env";
 import type { Status } from "#minesweeper/constants";
+import { STATUSES } from "#minesweeper/constants";
 import { UserError } from "#utils/errors";
 
+import { STATUS_TAGS } from "./constants.ts";
 import { GameMessage } from "./message.ts";
-import { ensureTags, threadName } from "./utils.ts";
+import { threadName } from "./utils.ts";
 
 export class GameForum {
   readonly #channel: ForumChannel;
@@ -44,7 +52,7 @@ export class GameForum {
     );
 
     if (!channel) {
-      throw new UserError(`Na tym serwerze nie ma forum #${env.GAME_FORUM_NAME}.`);
+      throw new UserError(`Na tym serwerze nie ma forum #${env.GAME_FORUM_NAME}`);
     }
 
     return new GameForum(channel, await ensureTags(channel));
@@ -100,4 +108,58 @@ export class GameForum {
       name: threadName(username),
     });
   }
+}
+
+function findTag(channel: ForumChannel, status: Status): GuildForumTag | undefined {
+  const wanted = STATUS_TAGS[status].name.trim().toLocaleLowerCase();
+  return channel.availableTags.find((tag) => tag.name.trim().toLocaleLowerCase() === wanted);
+}
+
+const pendingTags = new Map<string, Promise<Record<Status, string>>>();
+
+function ensureTags(channel: ForumChannel): Promise<Record<Status, string>> {
+  let pending = pendingTags.get(channel.id);
+
+  if (!pending) {
+    pending = resolveTags(channel).finally(() => pendingTags.delete(channel.id));
+    pendingTags.set(channel.id, pending);
+  }
+
+  return pending;
+}
+
+async function resolveTags(cached: ForumChannel): Promise<Record<Status, string>> {
+  let channel = cached;
+
+  if (STATUSES.some((status) => !findTag(channel, status))) {
+    channel = await cached.fetch(true);
+    const missing = STATUSES.filter((status) => !findTag(channel, status));
+
+    if (missing.length > 0) {
+      channel = await channel.setAvailableTags([
+        ...channel.availableTags,
+        ...missing.map((status) => ({
+          name: STATUS_TAGS[status].name,
+          emoji: { id: null, name: STATUS_TAGS[status].emoji },
+          moderated: true, // only the bot/moderators can apply
+        })),
+      ]);
+    }
+  }
+
+  function idOf(status: Status): string {
+    const tag = findTag(channel, status);
+
+    if (!tag) {
+      throw new Error(`Forum tag "${STATUS_TAGS[status].name}" is missing`);
+    }
+
+    return tag.id;
+  }
+
+  return {
+    playing: idOf("playing"),
+    won: idOf("won"),
+    lost: idOf("lost"),
+  };
 }

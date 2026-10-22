@@ -12,7 +12,7 @@ const CELL_BY_EMOJI = new Map<string, Cell>(
       [Emoji.focus.hidden, Cell.Hidden],
       [Emoji.flag, Cell.Flagged],
       [Emoji.focus.flag, Cell.Flagged],
-      ...[Emoji.empty, Emoji.focus.empty, Emoji.mine, ...Emoji.digits].map((emoji): [string, Cell] => [
+      ...[Emoji.empty, Emoji.focus.revealed, Emoji.mine, ...Emoji.digits].map((emoji): [string, Cell] => [
         emoji,
         Cell.Revealed,
       ]),
@@ -38,17 +38,16 @@ function cellEmoji(game: Game, i: number): string {
     case Cell.Flagged:
       return focused ? Emoji.focus.flag : Emoji.flag;
     default: {
+      if (focused) {
+        return Emoji.focus.revealed;
+      }
+
       if (game.board.isMine(i)) {
         return Emoji.mine;
       }
 
       const count = game.board.count(i);
-
-      if (count > 0) {
-        return Emoji.digits[count - 1]!;
-      }
-
-      return focused ? Emoji.focus.empty : Emoji.empty;
+      return count === 0 ? Emoji.empty : Emoji.digits[count - 1]!;
     }
   }
 }

@@ -8,7 +8,7 @@ import { UserError } from "#utils/errors";
 
 import { GameMessage } from "./message.ts";
 import { createOptionsSchema } from "./schemas.ts";
-import { updateGame } from "./utils.ts";
+import { updateGame } from "./service.ts";
 
 export const gameCommand: Command = {
   data: new SlashCommandBuilder()
@@ -47,11 +47,11 @@ async function create(interaction: ChatInputCommandInteraction<"cached">): Promi
   const challenged = options.getUser("challenge");
 
   if (challenged?.id === user.id) {
-    throw new UserError("Nie możesz wyzwać samego siebie.");
+    throw new UserError("Nie możesz wyzwać samego siebie");
   }
 
   if (challenged?.bot) {
-    throw new UserError("Nie możesz wyzwać bota.");
+    throw new UserError("Nie możesz wyzwać bota");
   }
 
   const parsed = createOptionsSchema.safeParse({
@@ -75,7 +75,7 @@ async function create(interaction: ChatInputCommandInteraction<"cached">): Promi
 
     // one own game at a time
     if (active.some(({ game }) => game.players.player === player.id && !game.players.challenger)) {
-      throw new UserError("Masz już aktywną planszę. Dokończ ją albo użyj /game cancel.");
+      throw new UserError("Masz już aktywną planszę. Dokończ ją albo użyj /game cancel");
     }
   }
 
@@ -100,5 +100,5 @@ async function cancel(interaction: ChatInputCommandInteraction<"cached">): Promi
     await updateGame(message, (game) => game.state.resign());
   }
 
-  await interaction.editReply(games.length ? `Poddane plansze: ${games.length}.` : "Nie masz aktywnych plansz.");
+  await interaction.editReply(games.length ? `Poddane plansze: ${games.length}` : "Nie masz aktywnych plansz");
 }

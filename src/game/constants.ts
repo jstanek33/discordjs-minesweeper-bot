@@ -28,7 +28,7 @@ export const Emoji = {
   focus: {
     hidden: "🟨",
     flag: "🏁",
-    empty: "🔳",
+    revealed: "🔳",
   },
 } as const;
 

@@ -23,7 +23,7 @@ export const gameSpecSchema = z
       ctx.addIssue({
         code: "custom",
         path: ["bombs"],
-        message: `Plansza ${cols}x${rows} mieści maks. ${max} bomb.`,
+        message: `Plansza ${cols}x${rows} mieści maks. ${max} bomb`,
       });
     }
   });
@@ -38,7 +38,7 @@ export const createOptionsSchema = z
   })
   .refine(({ ranked, seed }) => !(ranked && seed), {
     path: ["seed"],
-    message: "Gra rankingowa nie może mieć własnego seeda.",
+    message: "Gra rankingowa nie może mieć własnego seeda",
   })
   .transform((options) => ({
     ...options,

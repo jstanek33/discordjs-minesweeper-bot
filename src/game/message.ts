@@ -107,8 +107,8 @@ function describe(status: Status, { player, challenger }: Players, count: number
   const challenge = challenger ? ` (wyzwanie od gracza ${userMention(challenger)})` : "";
   const text: Record<Status, string> = {
     playing: `Plansza gracza ${you}`,
-    won: `Wygrałeś ${you}! Jest to twoja ${count} wygrana.`,
-    lost: `Przegrałeś ${you}! Jest to twoja ${count} przegrana.`,
+    won: `Wygrałeś ${you}! Jest to twoja ${count} wygrana`,
+    lost: `Przegrałeś ${you}! Jest to twoja ${count} przegrana`,
   };
 
   return text[status] + challenge;
