@@ -36,26 +36,57 @@ const SCHEMA = `
   CREATE INDEX IF NOT EXISTS results_by_player ON results (guild_id, player_id, outcome);
 `;
 
+export interface PlayerTotals {
+  playerId: string;
+  wins: number;
+  losses: number;
+}
+
 const countRowSchema = z.object({ total: z.number() });
+const totalsRowsSchema = z.array(z.object({ playerId: z.string(), wins: z.number(), losses: z.number() }));
 
-let statements: { insert: StatementSync; count: StatementSync } | undefined;
+interface Statements {
+  insert: StatementSync;
+  count: StatementSync;
+  rankedTotals: StatementSync;
+}
 
-function prepared(): { insert: StatementSync; count: StatementSync } {
+let statements: Statements | undefined;
+
+function prepared(): Statements {
   if (!statements) {
     const db = database();
     db.exec(SCHEMA);
 
     statements = {
       insert: db.prepare(`
-        INSERT OR IGNORE INTO results (
-          game_id, guild_id, player_id, challenger_id, outcome, ranked,
-          rows, cols, bombs, seed, started_at, finished_at
-        ) VALUES (
-          :gameId, :guildId, :playerId, :challengerId, :outcome, :ranked,
-          :rows, :cols, :bombs, :seed, :startedAt, :finishedAt
-        )
+        INSERT OR IGNORE INTO
+          results (
+            game_id, guild_id, player_id, challenger_id, outcome, ranked,
+            rows, cols, bombs, seed, started_at, finished_at
+          )
+          VALUES (
+            :gameId, :guildId, :playerId, :challengerId, :outcome, :ranked,
+            :rows, :cols, :bombs, :seed, :startedAt, :finishedAt
+          )
       `),
-      count: db.prepare("SELECT COUNT(*) AS total FROM results WHERE guild_id = ? AND player_id = ? AND outcome = ?"),
+      count: db.prepare(`
+        SELECT
+          COUNT(*) AS total
+        FROM
+          results
+        WHERE
+          guild_id = ? AND player_id = ? AND outcome = ?
+      `),
+      rankedTotals: db.prepare(`
+        SELECT
+          player_id AS playerId, SUM(outcome = 'won') AS wins, SUM(outcome = 'lost') AS losses
+        FROM
+          results
+        WHERE
+          guild_id = ? AND ranked = 1
+        GROUP BY player_id
+      `),
     };
   }
 
@@ -81,4 +112,8 @@ export function recordResult(result: GameResult): number {
   });
 
   return countRowSchema.parse(count.get(result.guildId, result.playerId, result.outcome)).total;
+}
+
+export function rankedTotals(guildId: string): PlayerTotals[] {
+  return totalsRowsSchema.parse(prepared().rankedTotals.all(guildId));
 }
