@@ -59,13 +59,13 @@ export class GameForum {
 
   // oxlint-disable-next-line typescript/explicit-function-return-type -- infer
   public async activeGames(username: string) {
-    const threads: ThreadChannel[] = [];
-
-    for await (const thread of this.#threads()) {
-      if (thread.name === threadName(username) && this.hasStatus(thread, "playing")) {
-        threads.push(thread);
-      }
-    }
+    const { threads: active } = await this.#channel.threads.fetchActive();
+    const threads = active.filter(
+      (thread) =>
+        thread.parentId === this.#channel.id &&
+        thread.name === threadName(username) &&
+        this.hasStatus(thread, "playing"),
+    );
 
     const messages = await Promise.all(threads.map((thread) => thread.fetchStarterMessage()));
     return messages
