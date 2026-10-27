@@ -1,3 +1,4 @@
+import * as crypto from "node:crypto";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 
@@ -6,7 +7,6 @@ import * as z from "zod";
 
 import { cwd, env } from "#env";
 import { commands } from "#registry";
-import { sha256 } from "#utils/crypto";
 
 const CACHE_FILE = path.resolve(cwd, ".cache/commands.json");
 const cacheSchema = z.record(z.string(), z.string());
@@ -54,7 +54,7 @@ if (duplicates.length > 0) {
   throw new Error(`Duplicate command names: ${[...new Set(duplicates)].join(", ")}`);
 }
 
-const hash = sha256(JSON.stringify(body));
+const hash = crypto.createHash("sha256").update(JSON.stringify(body)).digest("hex");
 const cache = await getCache();
 
 if (!force && cache[scope.key] === hash) {

@@ -5,13 +5,13 @@ import { Board } from "#minesweeper/board";
 import type { Status } from "#minesweeper/constants";
 import { Game } from "#minesweeper/game";
 import type { Players } from "#types/utils";
-import { seal, unseal } from "#utils/seed";
 
 import { FOOTER_PATTERN, MENTION_PATTERN, SEALED_PREFIX, STATUS_COLORS, TITLE_PATTERN } from "./constants.ts";
 import { renderControls } from "./controls.ts";
 import { parseGrid, renderGrid } from "./grid.ts";
 import { gameSpecSchema } from "./schemas.ts";
 import type { GameSpec } from "./schemas.ts";
+import { seal, unseal } from "./seal.ts";
 
 export class GameMessage {
   public constructor(

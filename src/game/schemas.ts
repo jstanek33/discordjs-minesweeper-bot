@@ -1,9 +1,9 @@
 import * as z from "zod";
 
 import { ACTIONS, DEFAULT_SIZE, MAX_SIZE } from "#minesweeper/constants";
+import { randomSeed } from "#minesweeper/random";
 import { boardSizeSchema, bombsSchema, seedSchema } from "#minesweeper/schemas";
 import { defaultBombs, maxBombs } from "#minesweeper/utils";
-import { randomSeed } from "#utils/crypto";
 
 import { BUTTON_PREFIX } from "./constants.ts";
 
