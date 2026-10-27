@@ -5,10 +5,8 @@ import { UserError } from "#core/errors";
 import type { Command } from "#core/types";
 import { MAX_SIZE, MIN_SIZE } from "#minesweeper/constants";
 
-import { GameForum } from "./forum.ts";
-import { GameMessage } from "./message.ts";
 import { createOptionsSchema } from "./schemas.ts";
-import { updateGame } from "./service.ts";
+import { resignGames, startGame } from "./service.ts";
 
 export const gameCommand: Command = {
   data: new SlashCommandBuilder()
@@ -43,17 +41,7 @@ export const gameCommand: Command = {
 };
 
 async function create(interaction: ChatInputCommandInteraction<"cached">): Promise<void> {
-  const { options, user } = interaction;
-  const challenged = options.getUser("challenge");
-
-  if (challenged?.id === user.id) {
-    throw new UserError("Nie możesz wyzwać samego siebie");
-  }
-
-  if (challenged?.bot) {
-    throw new UserError("Nie możesz wyzwać bota");
-  }
-
+  const { options } = interaction;
   const parsed = createOptionsSchema.safeParse({
     rows: options.getInteger("rows") ?? undefined,
     cols: options.getInteger("cols") ?? undefined,
@@ -67,38 +55,20 @@ async function create(interaction: ChatInputCommandInteraction<"cached">): Promi
   }
 
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-  const forum = await GameForum.of(interaction.guild);
-  const player = challenged ?? user;
 
-  if (!challenged) {
-    const active = await forum.activeGames(player.username);
-
-    // one own game at a time
-    if (active.some(({ game }) => game.players.player === player.id && !game.players.challenger)) {
-      throw new UserError("Masz już aktywną planszę. Dokończ ją albo użyj /game cancel");
-    }
-  }
-
-  const game = GameMessage.create(parsed.data, {
-    player: player.id,
-    challenger: challenged ? user.id : undefined,
+  const thread = await startGame({
+    guild: interaction.guild,
+    creator: interaction.user,
+    challenged: options.getUser("challenge"),
+    spec: parsed.data,
   });
 
-  const thread = await forum.post(player.username, game.toPayload());
   await interaction.editReply(`Plansza gotowa: ${channelMention(thread.id)}`);
 }
 
 async function cancel(interaction: ChatInputCommandInteraction<"cached">): Promise<void> {
-  const { user } = interaction;
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
-  const forum = await GameForum.of(interaction.guild);
-  const games = (await forum.activeGames(user.username)).filter(({ game }) => game.players.player === user.id);
-
-  for (const { message } of games) {
-    // oxlint-disable-next-line no-await-in-loop
-    await updateGame(message, (game) => game.state.resign());
-  }
-
-  await interaction.editReply(games.length ? `Poddane plansze: ${games.length}` : "Nie masz aktywnych plansz");
+  const resigned = await resignGames(interaction.guild, interaction.user);
+  await interaction.editReply(resigned ? `Poddane plansze: ${resigned}` : "Nie masz aktywnych plansz");
 }

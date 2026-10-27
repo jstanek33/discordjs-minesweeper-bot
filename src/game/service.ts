@@ -1,16 +1,79 @@
-import type { ButtonInteraction, Message } from "discord.js";
+import type { ButtonInteraction, Guild, Message, ThreadChannel, User } from "discord.js";
 
+import { UserError } from "#core/errors";
 import { SerialStore } from "#core/serial-store";
+import type { Action, Position } from "#minesweeper/types";
 
 import { GameForum } from "./forum.ts";
-import { GameMessage } from "./message.ts";
+import { GameMessage, parsePlayers } from "./message.ts";
+import type { GameSpec } from "./schemas.ts";
+
+interface StartGameInput {
+  guild: Guild;
+  creator: User;
+  /** The user challenged to play the board, if any. */
+  challenged: User | null;
+  spec: GameSpec;
+}
+
+export async function startGame({ guild, creator, challenged, spec }: StartGameInput): Promise<ThreadChannel> {
+  if (challenged?.id === creator.id) {
+    throw new UserError("Nie możesz wyzwać samego siebie");
+  }
+
+  if (challenged?.bot) {
+    throw new UserError("Nie możesz wyzwać bota");
+  }
+
+  const forum = await GameForum.of(guild);
+  const player = challenged ?? creator;
+
+  if (!challenged) {
+    const active = await forum.activeGames(player.username);
+
+    if (active.some(({ game }) => game.players.player === player.id && !game.players.challenger)) {
+      throw new UserError("Masz już aktywną planszę. Dokończ ją albo użyj /game cancel");
+    }
+  }
+
+  const game = GameMessage.create(spec, {
+    player: player.id,
+    challenger: challenged ? creator.id : undefined,
+  });
+
+  return forum.post(player.username, game.toPayload());
+}
+
+export async function playMove(
+  interaction: ButtonInteraction<"cached">,
+  action: Action,
+  target: Position,
+): Promise<void> {
+  if (parsePlayers(interaction.message.content).player !== interaction.user.id) {
+    throw new UserError("To nie twoja plansza");
+  }
+
+  await updateGame(interaction.message, (game) => game.state.apply(action, target), interactionOutput(interaction));
+}
+
+export async function resignGames(guild: Guild, user: User): Promise<number> {
+  const forum = await GameForum.of(guild);
+  const games = (await forum.activeGames(user.username)).filter(({ game }) => game.players.player === user.id);
+
+  for (const { message } of games) {
+    // oxlint-disable-next-line no-await-in-loop
+    await updateGame(message, (game) => game.state.resign());
+  }
+
+  return games.length;
+}
 
 interface Output {
   show(payload: ReturnType<GameMessage["toPayload"]>): Promise<void>;
   hold(): Promise<void>;
 }
 
-export function interactionOutput(interaction: ButtonInteraction): Output {
+function interactionOutput(interaction: ButtonInteraction): Output {
   function answered(): boolean {
     return interaction.deferred || interaction.replied;
   }
@@ -43,7 +106,7 @@ function messageOutput(message: Message<true>): Output {
 const STORE_CAPACITY = 512;
 const store = new SerialStore<GameMessage>(STORE_CAPACITY);
 
-export function updateGame(
+function updateGame(
   message: Message<true>,
   updater: (game: GameMessage) => boolean,
   output: Output = messageOutput(message),
