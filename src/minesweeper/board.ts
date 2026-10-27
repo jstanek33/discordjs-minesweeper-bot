@@ -1,7 +1,6 @@
-import type { Position } from "#types/utils";
-
 import { SAFE_CELLS } from "./constants.ts";
 import { seededRandom } from "./random.ts";
+import type { Position } from "./types.ts";
 
 export class Board {
   readonly #mines: Uint8Array;

@@ -1,6 +1,6 @@
 import type { Game } from "#minesweeper/game";
-import { Cell } from "#minesweeper/game";
-import type { Position } from "#types/utils";
+import { Cell } from "#minesweeper/types";
+import type { Position } from "#minesweeper/types";
 import { fail } from "#utils/errors";
 
 import { Emoji } from "./constants.ts";

@@ -1,14 +1,7 @@
-import type { Position } from "#types/utils";
-
 import type { Board } from "./board.ts";
 import { START } from "./constants.ts";
-import type { Action, Status } from "./constants.ts";
-
-export enum Cell {
-  Hidden = 0,
-  Flagged = 1,
-  Revealed = 2,
-}
+import { Cell } from "./types.ts";
+import type { Action, Position, Status } from "./types.ts";
 
 export class Game {
   public readonly board: Board;

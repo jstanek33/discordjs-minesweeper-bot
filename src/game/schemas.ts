@@ -1,11 +1,15 @@
 import * as z from "zod";
 
-import { ACTIONS, DEFAULT_SIZE, MAX_SIZE } from "#minesweeper/constants";
+import { DEFAULT_SIZE, MAX_SIZE, MIN_SIZE, SEED_PATTERN } from "#minesweeper/constants";
 import { randomSeed } from "#minesweeper/random";
-import { boardSizeSchema, bombsSchema, seedSchema } from "#minesweeper/schemas";
-import { defaultBombs, maxBombs } from "#minesweeper/utils";
+import { defaultBombs, maxBombs } from "#minesweeper/rules";
+import { ACTIONS } from "#minesweeper/types";
 
 import { BUTTON_PREFIX } from "./constants.ts";
+
+const boardSizeSchema = z.int().min(MIN_SIZE).max(MAX_SIZE);
+const bombsSchema = z.int().min(1);
+const seedSchema = z.string().regex(SEED_PATTERN, "Seed: litery, cyfry, _ lub -, maks. 32 znaki");
 
 export type GameSpec = z.infer<typeof gameSpecSchema>;
 export const gameSpecSchema = z

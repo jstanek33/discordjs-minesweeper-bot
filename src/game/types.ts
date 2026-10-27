@@ -1,4 +1,4 @@
-import type { Action } from "#minesweeper/constants";
+import type { Action } from "#minesweeper/types";
 
 export interface Control {
   action: Action | null;

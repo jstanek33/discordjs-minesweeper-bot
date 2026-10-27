@@ -1,8 +1,7 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
-import type { Action } from "#minesweeper/constants";
 import type { Game } from "#minesweeper/game";
-import type { Position } from "#types/utils";
+import type { Action, Position } from "#minesweeper/types";
 
 import { BUTTON_PLACEHOLDER_ID, BUTTON_PREFIX } from "./constants.ts";
 import { buttonIdSchema } from "./schemas.ts";

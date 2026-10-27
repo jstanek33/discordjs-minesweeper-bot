@@ -8,8 +8,8 @@ import type {
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
 
 import { env } from "#env";
-import type { Status } from "#minesweeper/constants";
-import { STATUSES } from "#minesweeper/constants";
+import type { Status } from "#minesweeper/types";
+import { STATUSES } from "#minesweeper/types";
 import { UserError } from "#utils/errors";
 
 import { STATUS_TAGS } from "./constants.ts";

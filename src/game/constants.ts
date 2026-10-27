@@ -1,6 +1,6 @@
 import { Colors, MessageMentions } from "discord.js";
 
-import type { Status } from "#minesweeper/constants";
+import type { Status } from "#minesweeper/types";
 
 export const BUTTON_PREFIX = "game";
 export const BUTTON_PLACEHOLDER_ID = `${BUTTON_PREFIX}:none`;
