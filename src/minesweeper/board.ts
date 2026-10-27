@@ -32,7 +32,7 @@ export class Board implements BoardSpec {
       pool[i] = mine;
       this.#mines[mine] = 1;
 
-      for (const n of this.neighbors(pool[i]!)) {
+      for (const n of this.neighbors(mine)) {
         this.#counts[n]!++;
       }
     }

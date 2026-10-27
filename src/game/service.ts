@@ -134,8 +134,6 @@ async function saveGame(message: Message<true>, game: GameMessage, output: Outpu
     return;
   }
 
-  await output.hold();
-
   const thread = message.channel;
   if (!thread.isThread()) {
     throw new Error("Game message is not in a forum post");

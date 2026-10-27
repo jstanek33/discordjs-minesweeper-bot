@@ -31,8 +31,8 @@ export const gameSpecSchema = z
 
 export const createOptionsSchema = z
   .object({
-    rows: boardSizeSchema.default(DEFAULT_SIZE),
-    cols: boardSizeSchema.default(DEFAULT_SIZE),
+    rows: boardSizeSchema.optional(),
+    cols: boardSizeSchema.optional(),
     bombs: bombsSchema.optional(),
     seed: seedSchema.optional(),
     ranked: z.boolean().default(false),
