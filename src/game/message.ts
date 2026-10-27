@@ -26,8 +26,7 @@ export class GameMessage {
   ) {}
 
   public static create(spec: GameSpec, players: Players): GameMessage {
-    const { rows, cols, bombs, seed } = spec;
-    return new GameMessage(new Game(new Board(rows, cols, bombs, seed)), spec.ranked, new Date(), players);
+    return new GameMessage(new Game(new Board(spec)), spec.ranked, new Date(), players);
   }
 
   public static fromMessage({ content, embeds }: Pick<Message, "content" | "embeds">): GameMessage {
@@ -49,10 +48,9 @@ export class GameMessage {
     });
 
     const { cells, cursor } = parseGrid(embed.description, spec.rows, spec.cols);
-    const { rows, cols, bombs, seed: specSeed } = spec;
 
     return new GameMessage(
-      new Game(new Board(rows, cols, bombs, specSeed), cells, cursor),
+      new Game(new Board(spec), cells, cursor),
       spec.ranked,
       new Date(embed.timestamp),
       parsePlayers(content),

@@ -3,6 +3,13 @@ export interface Position {
   readonly y: number;
 }
 
+export interface BoardSpec {
+  readonly rows: number;
+  readonly cols: number;
+  readonly bombs: number;
+  readonly seed: string;
+}
+
 export type Cell = (typeof Cell)[keyof typeof Cell];
 export const Cell = {
   Hidden: 0,
