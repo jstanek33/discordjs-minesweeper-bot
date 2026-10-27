@@ -54,7 +54,7 @@ function move(emoji: string, dx: number, dy: number): Control {
   };
 }
 
-export function encodeButtonId(action: Action, { x, y }: Position): string {
+function encodeButtonId(action: Action, { x, y }: Position): string {
   return encodeCustomId(BUTTON_PREFIX, action, x, y);
 }
 

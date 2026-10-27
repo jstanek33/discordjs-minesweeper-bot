@@ -5,14 +5,12 @@ import * as z from "zod";
 import { database } from "#core/database";
 import type { BoardSpec, Status } from "#minesweeper/types";
 
-export type Outcome = Exclude<Status, "playing">;
-
 export interface GameResult extends BoardSpec {
   gameId: string;
   guildId: string;
   playerId: string;
   challengerId: string | undefined;
-  outcome: Outcome;
+  outcome: Exclude<Status, "playing">;
   ranked: boolean;
   startedAt: Date;
   finishedAt: Date;
