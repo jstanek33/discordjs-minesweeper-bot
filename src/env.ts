@@ -16,5 +16,4 @@ const envSchema: z.ZodType<Env> = z.object({
   GAME_FORUM_NAME: z.string().nonempty(),
 });
 
-export const cwd = process.cwd();
 export const env: Env = envSchema.parse(process.env);

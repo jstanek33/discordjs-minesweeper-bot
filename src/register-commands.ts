@@ -5,10 +5,10 @@ import * as path from "node:path";
 import { REST, Routes } from "discord.js";
 import * as z from "zod";
 
-import { cwd, env } from "#env";
+import { env } from "#env";
 import { commands } from "#registry";
 
-const CACHE_FILE = path.resolve(cwd, ".cache/commands.json");
+const CACHE_FILE = path.resolve(".cache/commands.json");
 const cacheSchema = z.record(z.string(), z.string());
 const force = process.argv.includes("--force");
 
@@ -37,6 +37,7 @@ async function getCache(): Promise<Record<string, string>> {
 }
 
 async function setCache(data: Record<string, string>): Promise<void> {
+  await fs.mkdir(path.dirname(CACHE_FILE), { recursive: true });
   await fs.writeFile(CACHE_FILE, JSON.stringify(data, null, 2));
 }
 
@@ -59,11 +60,10 @@ const cache = await getCache();
 
 if (!force && cache[scope.key] === hash) {
   console.log(`Commands unchanged for ${scope.key}. Use --force to re-push`);
-  process.exit();
+} else {
+  const rest = new REST().setToken(env.CLIENT_SECRET);
+  await rest.put(scope.route, { body });
+
+  await setCache({ ...cache, [scope.key]: hash });
+  console.log(`Registered ${body.length} commands for ${scope.key}`);
 }
-
-const rest = new REST().setToken(env.CLIENT_SECRET);
-await rest.put(scope.route, { body });
-
-await setCache({ ...cache, [scope.key]: hash });
-console.log(`Registered ${body.length} commands for ${scope.key}`);
