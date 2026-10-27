@@ -41,9 +41,20 @@ export const createOptionsSchema = z
     path: ["seed"],
     message: "Gra rankingowa nie może mieć własnego seeda",
   })
-  .transform((options) => ({
-    ...options,
-    bombs: options.bombs ?? defaultBombs(options.rows, options.cols),
-    seed: options.seed ?? randomSeed(),
-  }))
+  .refine(({ ranked, rows, cols, bombs }) => !(ranked && (rows ?? cols ?? bombs) !== undefined), {
+    path: ["ranked"],
+    message: `Gra rankingowa ma stałą planszę ${DEFAULT_SIZE}x${DEFAULT_SIZE}`,
+  })
+  .transform((options) => {
+    const rows = options.rows ?? DEFAULT_SIZE;
+    const cols = options.cols ?? DEFAULT_SIZE;
+
+    return {
+      ...options,
+      rows,
+      cols,
+      bombs: options.bombs ?? defaultBombs(rows, cols),
+      seed: options.seed ?? randomSeed(),
+    };
+  })
   .pipe(gameSpecSchema);
