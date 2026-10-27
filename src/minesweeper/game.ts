@@ -4,11 +4,12 @@ import type { Board } from "./board.ts";
 import { START } from "./constants.ts";
 import type { Action, Status } from "./constants.ts";
 
-export enum Cell {
-  Hidden = 0,
-  Flagged = 1,
-  Revealed = 2,
-}
+export type Cell = (typeof Cell)[keyof typeof Cell];
+export const Cell = {
+  Hidden: 0,
+  Flagged: 1,
+  Revealed: 2,
+} as const;
 
 export class Game {
   public readonly board: Board;

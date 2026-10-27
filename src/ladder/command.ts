@@ -1,6 +1,6 @@
 import { InteractionContextType, SlashCommandBuilder } from "discord.js";
 
-import type { Command } from "#bot/types";
+import type { Command } from "#types/discord";
 
 export const ladderCommand: Command = {
   data: new SlashCommandBuilder()

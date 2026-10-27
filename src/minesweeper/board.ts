@@ -25,8 +25,10 @@ export class Board {
     for (let i = 0; i < bombs; i++) {
       const j = i + Math.floor(random() * (pool.length - i));
 
-      [pool[i]!, pool[j]!] = [pool[j]!, pool[i]!];
-      this.#mines[pool[i]!] = 1;
+      const mine = pool[j]!;
+      pool[j] = pool[i]!;
+      pool[i] = mine;
+      this.#mines[mine] = 1;
 
       for (const n of this.neighbors(pool[i]!)) {
         this.#counts[n]!++;

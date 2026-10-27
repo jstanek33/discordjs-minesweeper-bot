@@ -31,13 +31,14 @@ function graphemes(line: string): string[] {
 
 function cellEmoji(game: Game, i: number): string {
   const focused = i === game.board.index(game.cursor) && game.status === "playing";
+  const cell = game.cells[i] ?? fail(`Cell ${i} is outside the board`);
 
-  switch (game.cells[i]) {
+  switch (cell) {
     case Cell.Hidden:
       return focused ? Emoji.focus.hidden : Emoji.hidden;
     case Cell.Flagged:
       return focused ? Emoji.focus.flag : Emoji.flag;
-    default: {
+    case Cell.Revealed: {
       if (focused) {
         return Emoji.focus.revealed;
       }
@@ -49,6 +50,8 @@ function cellEmoji(game: Game, i: number): string {
       const count = game.board.count(i);
       return count === 0 ? Emoji.empty : Emoji.digits[count - 1]!;
     }
+    default:
+      throw new Error(`Invalid cell value: ${cell}`);
   }
 }
 
