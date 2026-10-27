@@ -1,7 +1,7 @@
+import { fail } from "#core/errors";
 import type { Game } from "#minesweeper/game";
 import { Cell } from "#minesweeper/types";
 import type { Position } from "#minesweeper/types";
-import { fail } from "#utils/errors";
 
 import { Emoji } from "./constants.ts";
 

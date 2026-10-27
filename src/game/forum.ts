@@ -7,10 +7,10 @@ import type {
 } from "discord.js";
 import { ChannelType, ThreadAutoArchiveDuration } from "discord.js";
 
+import { UserError } from "#core/errors";
 import { env } from "#env";
 import type { Status } from "#minesweeper/types";
 import { STATUSES } from "#minesweeper/types";
-import { UserError } from "#utils/errors";
 
 import { STATUS_TAGS } from "./constants.ts";
 import { GameMessage } from "./message.ts";

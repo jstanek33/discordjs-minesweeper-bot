@@ -1,9 +1,9 @@
+import { UserError } from "#core/errors";
+import type { ButtonHandler } from "#core/types";
 import { BUTTON_PREFIX } from "#game/constants";
 import { decodeButtonId } from "#game/controls";
 import { parsePlayers } from "#game/message";
 import { interactionOutput, updateGame } from "#game/service";
-import type { ButtonHandler } from "#types/discord";
-import { UserError } from "#utils/errors";
 
 export const gameButtons: ButtonHandler = {
   prefix: BUTTON_PREFIX,

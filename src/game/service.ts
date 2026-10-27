@@ -1,6 +1,6 @@
 import type { ButtonInteraction, Message } from "discord.js";
 
-import { SerialStore } from "#utils/serial-store";
+import { SerialStore } from "#core/serial-store";
 
 import { STORE_CAPACITY } from "./constants.ts";
 import { GameForum } from "./forum.ts";

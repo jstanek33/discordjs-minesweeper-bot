@@ -1,9 +1,10 @@
 import { Colors, MessageMentions } from "discord.js";
 
+import { encodeCustomId } from "#core/custom-id";
 import type { Status } from "#minesweeper/types";
 
 export const BUTTON_PREFIX = "game";
-export const BUTTON_PLACEHOLDER_ID = `${BUTTON_PREFIX}:none`;
+export const BUTTON_PLACEHOLDER_ID = encodeCustomId(BUTTON_PREFIX, "none");
 export const SEALED_PREFIX = "🔒";
 export const STORE_CAPACITY = 512;
 

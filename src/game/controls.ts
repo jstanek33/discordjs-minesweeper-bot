@@ -1,5 +1,6 @@
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle } from "discord.js";
 
+import { decodeCustomId, encodeCustomId } from "#core/custom-id";
 import type { Game } from "#minesweeper/game";
 import type { Action, Position } from "#minesweeper/types";
 
@@ -23,11 +24,11 @@ function move(emoji: string, dx: number, dy: number): Control {
 }
 
 export function encodeButtonId(action: Action, { x, y }: Position): string {
-  return [BUTTON_PREFIX, action, x, y].join(":");
+  return encodeCustomId(BUTTON_PREFIX, action, x, y);
 }
 
 export function decodeButtonId(customId: string): { action: Action; target: Position } {
-  const [, action, x, y] = buttonIdSchema.parse(customId.split(":"));
+  const [, action, x, y] = buttonIdSchema.parse(decodeCustomId(customId));
 
   return {
     action,

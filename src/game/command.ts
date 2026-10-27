@@ -1,10 +1,10 @@
 import type { ChatInputCommandInteraction } from "discord.js";
 import { InteractionContextType, MessageFlags, SlashCommandBuilder, channelMention } from "discord.js";
 
+import { UserError } from "#core/errors";
+import type { Command } from "#core/types";
 import { GameForum } from "#game/forum";
 import { MAX_SIZE, MIN_SIZE } from "#minesweeper/constants";
-import type { Command } from "#types/discord";
-import { UserError } from "#utils/errors";
 
 import { GameMessage } from "./message.ts";
 import { createOptionsSchema } from "./schemas.ts";
