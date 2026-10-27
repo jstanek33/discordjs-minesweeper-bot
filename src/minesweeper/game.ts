@@ -1,20 +1,13 @@
-import type { Position } from "#types/utils";
-
 import type { Board } from "./board.ts";
 import { START } from "./constants.ts";
-import type { Action, Status } from "./constants.ts";
-
-export type Cell = (typeof Cell)[keyof typeof Cell];
-export const Cell = {
-  Hidden: 0,
-  Flagged: 1,
-  Revealed: 2,
-} as const;
+import { Cell } from "./types.ts";
+import type { Action, Position, Status } from "./types.ts";
 
 export class Game {
   public readonly board: Board;
   public readonly cells: Uint8Array;
   public cursor: Position;
+  #status: Status;
 
   public constructor(board: Board, cells: Uint8Array = new Uint8Array(board.size), cursor: Position = START) {
     if (cells.length !== board.size) {
@@ -24,6 +17,25 @@ export class Game {
     this.board = board;
     this.cells = cells;
     this.cursor = cursor;
+    this.#status = this.#computeStatus();
+  }
+
+  #computeStatus(): Status {
+    let revealed = 0;
+
+    for (const [i, cell] of this.cells.entries()) {
+      if (cell !== Cell.Revealed) {
+        continue;
+      }
+
+      if (this.board.isMine(i)) {
+        return "lost";
+      }
+
+      revealed++;
+    }
+
+    return revealed === this.board.size - this.board.bombs ? "won" : "playing";
   }
 
   #open(start: number): void {
@@ -42,13 +54,13 @@ export class Game {
   }
 
   #settle(): void {
-    const status = this.status;
+    this.#status = this.#computeStatus();
 
-    if (status === "lost") {
+    if (this.#status === "lost") {
       this.cells.fill(Cell.Revealed);
     }
 
-    if (status === "won") {
+    if (this.#status === "won") {
       for (const i of this.cells.keys()) {
         if (this.board.isMine(i)) this.cells[i] = Cell.Flagged;
       }
@@ -60,21 +72,7 @@ export class Game {
   }
 
   public get status(): Status {
-    let revealed = 0;
-
-    for (const [i, cell] of this.cells.entries()) {
-      if (cell !== Cell.Revealed) {
-        continue;
-      }
-
-      if (this.board.isMine(i)) {
-        return "lost";
-      }
-
-      revealed++;
-    }
-
-    return revealed === this.board.size - this.board.bombs ? "won" : "playing";
+    return this.#status;
   }
 
   public get flags(): number {
@@ -94,17 +92,17 @@ export class Game {
       return false;
     }
 
+    if (action === "move") {
+      this.cursor = target; // cells unchanged, so the status is too
+      return true;
+    }
+
     const i = this.board.index(target);
-    switch (action) {
-      case "move":
-        this.cursor = target;
-        break;
-      case "flag":
-        this.cells[i] = this.cells[i] === Cell.Flagged ? Cell.Hidden : Cell.Flagged;
-        break;
-      case "reveal":
-        this.#open(i);
-        break;
+
+    if (action === "flag") {
+      this.cells[i] = this.cells[i] === Cell.Flagged ? Cell.Hidden : Cell.Flagged;
+    } else {
+      this.#open(i);
     }
 
     this.#settle();
@@ -116,15 +114,21 @@ export class Game {
       return false;
     }
 
-    const i = this.board.index(target);
-    const cell = this.cells[i];
-    const checks: Record<Action, () => boolean> = {
-      move: () => true,
-      reveal: () => cell === Cell.Hidden,
-      flag: () => cell !== Cell.Revealed,
-    };
+    const cell = this.cells[this.board.index(target)];
 
-    return checks[action]();
+    if (action === "reveal") {
+      return cell === Cell.Hidden;
+    }
+
+    if (action === "flag") {
+      if (cell === Cell.Hidden && this.flags >= this.board.bombs) {
+        return false;
+      }
+
+      return cell !== Cell.Revealed;
+    }
+
+    return true; // move
   }
 
   public clone(): Game {
@@ -137,6 +141,7 @@ export class Game {
     }
 
     this.cells.fill(Cell.Revealed);
+    this.#settle();
     return true;
   }
 }

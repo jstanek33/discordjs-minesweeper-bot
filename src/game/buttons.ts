@@ -1,9 +1,7 @@
-import { BUTTON_PREFIX } from "#game/constants";
-import { decodeButtonId } from "#game/controls";
-import { parsePlayers } from "#game/message";
-import { interactionOutput, updateGame } from "#game/service";
-import type { ButtonHandler } from "#types/discord";
-import { UserError } from "#utils/errors";
+import type { ButtonHandler } from "#core/types";
+
+import { BUTTON_PREFIX, decodeButtonId } from "./controls.ts";
+import { playMove } from "./service.ts";
 
 export const gameButtons: ButtonHandler = {
   prefix: BUTTON_PREFIX,
@@ -14,11 +12,6 @@ export const gameButtons: ButtonHandler = {
     }
 
     const { action, target } = decodeButtonId(interaction.customId);
-
-    if (parsePlayers(interaction.message.content).player !== interaction.user.id) {
-      throw new UserError("To nie twoja plansza");
-    }
-
-    await updateGame(interaction.message, (game) => game.state.apply(action, target), interactionOutput(interaction));
+    await playMove(interaction, action, target);
   },
 };

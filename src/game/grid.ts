@@ -1,7 +1,7 @@
+import { fail } from "#core/errors";
 import type { Game } from "#minesweeper/game";
-import { Cell } from "#minesweeper/game";
-import type { Position } from "#types/utils";
-import { fail } from "#utils/errors";
+import { Cell } from "#minesweeper/types";
+import type { Position } from "#minesweeper/types";
 
 import { Emoji } from "./constants.ts";
 
@@ -21,11 +21,12 @@ const CELL_BY_EMOJI = new Map<string, Cell>(
 );
 
 function bare(emoji: string): string {
-  return emoji.replaceAll("️", ""); // U+FE0F -> ""
+  return emoji.replaceAll("\uFE0F", "");
 }
 
+const segmenter = new Intl.Segmenter();
+
 function graphemes(line: string): string[] {
-  const segmenter = new Intl.Segmenter();
   return Array.from(segmenter.segment(line), ({ segment }) => bare(segment));
 }
 

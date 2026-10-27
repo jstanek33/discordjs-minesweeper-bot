@@ -1,17 +1,26 @@
-import { EmbedBuilder, userMention } from "discord.js";
+import { EmbedBuilder, MessageMentions, userMention } from "discord.js";
 import type { Message } from "discord.js";
 
 import { Board } from "#minesweeper/board";
-import type { Status } from "#minesweeper/constants";
 import { Game } from "#minesweeper/game";
-import type { Players } from "#types/utils";
-import { seal, unseal } from "#utils/seed";
+import type { Status } from "#minesweeper/types";
 
-import { FOOTER_PATTERN, MENTION_PATTERN, SEALED_PREFIX, STATUS_COLORS, TITLE_PATTERN } from "./constants.ts";
+import { STATUS_COLORS } from "./constants.ts";
 import { renderControls } from "./controls.ts";
 import { parseGrid, renderGrid } from "./grid.ts";
 import { gameSpecSchema } from "./schemas.ts";
 import type { GameSpec } from "./schemas.ts";
+import { seal, unseal } from "./seal.ts";
+
+const TITLE_PATTERN = /^Saper (?<cols>\d+)x(?<rows>\d+)(?<ranked> RANKED)?$/;
+const FOOTER_PATTERN = /^Bomby: (?<bombs>\d+) • Seed: (?<seed>\S+)$/;
+const MENTION_PATTERN = new RegExp(MessageMentions.UsersPattern, "g");
+const SEALED_PREFIX = "🔒"; // ranked seed mark
+
+export interface Players {
+  player: string;
+  challenger?: string | undefined;
+}
 
 export class GameMessage {
   public constructor(
@@ -22,8 +31,7 @@ export class GameMessage {
   ) {}
 
   public static create(spec: GameSpec, players: Players): GameMessage {
-    const { rows, cols, bombs, seed } = spec;
-    return new GameMessage(new Game(new Board(rows, cols, bombs, seed)), spec.ranked, new Date(), players);
+    return new GameMessage(new Game(new Board(spec)), spec.ranked, new Date(), players);
   }
 
   public static fromMessage({ content, embeds }: Pick<Message, "content" | "embeds">): GameMessage {
@@ -45,10 +53,9 @@ export class GameMessage {
     });
 
     const { cells, cursor } = parseGrid(embed.description, spec.rows, spec.cols);
-    const { rows, cols, bombs, seed: specSeed } = spec;
 
     return new GameMessage(
-      new Game(new Board(rows, cols, bombs, specSeed), cells, cursor),
+      new Game(new Board(spec), cells, cursor),
       spec.ranked,
       new Date(embed.timestamp),
       parsePlayers(content),
@@ -64,7 +71,7 @@ export class GameMessage {
   }
 
   // oxlint-disable-next-line typescript/explicit-function-return-type -- infer
-  public toPayload(count = 0) {
+  public toPayload(resultCount = 0) {
     const { state, status } = this;
     const { board } = state;
     const seed = this.ranked && status === "playing" ? SEALED_PREFIX + seal(board.seed) : board.seed;
@@ -82,7 +89,7 @@ export class GameMessage {
       .setTimestamp(this.startedAt);
 
     return {
-      content: describe(status, this.players, count),
+      content: describe(status, this.players, resultCount),
       embeds: [embed],
       components: renderControls(state),
       allowedMentions: {

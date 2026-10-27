@@ -1,7 +1,8 @@
 import { Client, Events, GatewayIntentBits } from "discord.js";
 
-import { registerInteractions } from "#dispatcher";
+import { registerInteractions } from "#core/dispatcher";
 import { env } from "#env";
+import { buttons, commands } from "#registry";
 
 async function main(): Promise<void> {
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
@@ -10,7 +11,7 @@ async function main(): Promise<void> {
     console.log(`Bot is up! Logged in as ${c.user.tag}`);
   });
 
-  registerInteractions(client);
+  registerInteractions(client, { commands, buttons });
   await client.login(env.CLIENT_SECRET);
 }
 

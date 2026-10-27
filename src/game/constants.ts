@@ -1,15 +1,6 @@
-import { Colors, MessageMentions } from "discord.js";
+import { Colors } from "discord.js";
 
-import type { Status } from "#minesweeper/constants";
-
-export const BUTTON_PREFIX = "game";
-export const BUTTON_PLACEHOLDER_ID = `${BUTTON_PREFIX}:none`;
-export const SEALED_PREFIX = "🔒";
-export const STORE_CAPACITY = 512;
-
-export const TITLE_PATTERN = /^Saper (?<cols>\d+)x(?<rows>\d+)(?<ranked> RANKED)?$/;
-export const FOOTER_PATTERN = /^Bomby: (?<bombs>\d+) • Seed: (?<seed>\S+)$/;
-export const MENTION_PATTERN = new RegExp(MessageMentions.UsersPattern, "g");
+import type { Status } from "#minesweeper/types";
 
 export const Emoji = {
   frame: "🟦",
@@ -32,6 +23,19 @@ export const Emoji = {
   },
 } as const;
 
+export const BOARD_LEGEND: readonly (readonly [emoji: string, meaning: string])[] = [
+  [Emoji.frame, "obramowanie planszy"],
+  [Object.values(Emoji.cursor).join(""), "strzałki na obramowaniu wskazują wiersz i kolumnę kursora"],
+  [Emoji.hidden, "nieodkryte pole"],
+  [Emoji.empty, "odkryte pole bez bomb dookoła"],
+  [`${Emoji.digits[0]}–${Emoji.digits[7]}`, "liczba bomb na sąsiednich polach"],
+  [Emoji.flag, "pole oflagowane jako bomba (po wygranej: wszystkie bomby)"],
+  [Emoji.mine, "bomba (widoczna po przegranej)"],
+  [Emoji.focus.hidden, "kursor na nieodkrytym polu"],
+  [Emoji.focus.flag, "kursor na oflagowanym polu"],
+  [Emoji.focus.revealed, "kursor na odkrytym polu"],
+];
+
 export const STATUS_TAGS: Record<Status, { name: string; emoji: string }> = {
   playing: {
     name: "W trakcie",
@@ -52,3 +56,7 @@ export const STATUS_COLORS: Record<Status, number> = {
   won: Colors.Green,
   lost: Colors.Red,
 };
+
+export function threadName(username: string): string {
+  return `Plansza użytkownika ${username}`;
+}

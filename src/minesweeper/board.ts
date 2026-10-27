@@ -1,19 +1,21 @@
-import type { Position } from "#types/utils";
-import { seededRandom } from "#utils/seed";
-
 import { SAFE_CELLS } from "./constants.ts";
+import { seededRandom } from "./random.ts";
+import type { BoardSpec, Position } from "./types.ts";
 
-export class Board {
+export class Board implements BoardSpec {
   readonly #mines: Uint8Array;
   readonly #counts: Uint8Array;
+  public readonly rows: number;
+  public readonly cols: number;
+  public readonly bombs: number;
+  public readonly seed: string;
   public readonly size: number;
 
-  public constructor(
-    public readonly rows: number,
-    public readonly cols: number,
-    public readonly bombs: number,
-    public readonly seed: string,
-  ) {
+  public constructor({ rows, cols, bombs, seed }: BoardSpec) {
+    this.rows = rows;
+    this.cols = cols;
+    this.bombs = bombs;
+    this.seed = seed;
     this.size = rows * cols;
     this.#mines = new Uint8Array(this.size);
     this.#counts = new Uint8Array(this.size);
@@ -30,7 +32,7 @@ export class Board {
       pool[i] = mine;
       this.#mines[mine] = 1;
 
-      for (const n of this.neighbors(pool[i]!)) {
+      for (const n of this.neighbors(mine)) {
         this.#counts[n]!++;
       }
     }

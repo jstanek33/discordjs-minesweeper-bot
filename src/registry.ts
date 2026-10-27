@@ -1,10 +1,8 @@
+import type { ButtonHandler, Command } from "#core/types";
 import { gameButtons } from "#game/buttons";
 import { gameCommand } from "#game/command";
+import { helpCommand } from "#help/command";
 import { ladderCommand } from "#ladder/command";
-import type { ButtonHandler, Command } from "#types/discord";
 
-export const commands: Command[] = [gameCommand, ladderCommand];
-export const commandsByName = new Map(commands.map((command) => [command.data.name, command]));
-
+export const commands: Command[] = [gameCommand, helpCommand, ladderCommand];
 export const buttons: ButtonHandler[] = [gameButtons];
-export const buttonsByPrefix = new Map(buttons.map((button) => [button.prefix, button]));
