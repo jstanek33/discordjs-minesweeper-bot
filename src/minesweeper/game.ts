@@ -121,6 +121,10 @@ export class Game {
     }
 
     if (action === "flag") {
+      if (cell === Cell.Hidden && this.flags >= this.board.bombs) {
+        return false;
+      }
+
       return cell !== Cell.Revealed;
     }
 
