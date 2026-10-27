@@ -32,6 +32,19 @@ const LAYOUT: Control[][] = [
   [move("↙️", -1, 1), move("⬇️", 0, 1), move("↘️", 1, 1)],
 ];
 
+export const CONTROLS_LEGEND: readonly (readonly [emoji: string, meaning: string])[] = [
+  [emojisOf("move"), "przesuń kursor"],
+  [emojisOf("flag"), "postaw lub zdejmij flagę"],
+  [emojisOf("reveal"), "odkryj pole; puste odkrywa całą okolicę"],
+];
+
+function emojisOf(action: Action): string {
+  return LAYOUT.flat()
+    .filter((control) => control.action === action)
+    .map((control) => control.emoji)
+    .join("");
+}
+
 function move(emoji: string, dx: number, dy: number): Control {
   return {
     action: "move",

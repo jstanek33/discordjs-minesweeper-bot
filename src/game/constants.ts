@@ -23,6 +23,19 @@ export const Emoji = {
   },
 } as const;
 
+export const BOARD_LEGEND: readonly (readonly [emoji: string, meaning: string])[] = [
+  [Emoji.frame, "obramowanie planszy"],
+  [Object.values(Emoji.cursor).join(""), "strzałki na obramowaniu wskazują wiersz i kolumnę kursora"],
+  [Emoji.hidden, "nieodkryte pole"],
+  [Emoji.empty, "odkryte pole bez bomb dookoła"],
+  [`${Emoji.digits[0]}–${Emoji.digits[7]}`, "liczba bomb na sąsiednich polach"],
+  [Emoji.flag, "pole oflagowane jako bomba (po wygranej: wszystkie bomby)"],
+  [Emoji.mine, "bomba (widoczna po przegranej)"],
+  [Emoji.focus.hidden, "kursor na nieodkrytym polu"],
+  [Emoji.focus.flag, "kursor na oflagowanym polu"],
+  [Emoji.focus.revealed, "kursor na odkrytym polu"],
+];
+
 export const STATUS_TAGS: Record<Status, { name: string; emoji: string }> = {
   playing: {
     name: "W trakcie",
