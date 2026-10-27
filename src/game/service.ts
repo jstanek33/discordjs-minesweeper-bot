@@ -6,6 +6,7 @@ import type { Action, Position } from "#minesweeper/types";
 
 import { GameForum } from "./forum.ts";
 import { GameMessage, parsePlayers } from "./message.ts";
+import { recordResult } from "./results.ts";
 import type { GameSpec } from "./schemas.ts";
 
 interface StartGameInput {
@@ -140,9 +141,24 @@ async function saveGame(message: Message<true>, game: GameMessage, output: Outpu
     throw new Error("Game message is not in a forum post");
   }
 
-  const forum = await GameForum.of(message.guild);
-  const count = (await forum.count(thread.name, status)) + 1;
+  const { rows, cols, bombs, seed } = game.state.board;
+  const count = recordResult({
+    gameId: message.id,
+    guildId: message.guildId,
+    playerId: game.players.player,
+    challengerId: game.players.challenger,
+    outcome: status,
+    ranked: game.ranked,
+    rows,
+    cols,
+    bombs,
+    seed,
+    startedAt: game.startedAt,
+    finishedAt: new Date(),
+  });
 
   await output.show(game.toPayload(count));
+
+  const forum = await GameForum.of(message.guild);
   await forum.close(thread, status);
 }
