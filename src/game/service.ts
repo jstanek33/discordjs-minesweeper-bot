@@ -2,7 +2,6 @@ import type { ButtonInteraction, Message } from "discord.js";
 
 import { SerialStore } from "#core/serial-store";
 
-import { STORE_CAPACITY } from "./constants.ts";
 import { GameForum } from "./forum.ts";
 import { GameMessage } from "./message.ts";
 
@@ -41,6 +40,7 @@ function messageOutput(message: Message<true>): Output {
   };
 }
 
+const STORE_CAPACITY = 512;
 const store = new SerialStore<GameMessage>(STORE_CAPACITY);
 
 export function updateGame(

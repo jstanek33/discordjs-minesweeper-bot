@@ -12,9 +12,8 @@ import { env } from "#env";
 import type { Status } from "#minesweeper/types";
 import { STATUSES } from "#minesweeper/types";
 
-import { STATUS_TAGS } from "./constants.ts";
+import { STATUS_TAGS, threadName } from "./constants.ts";
 import { GameMessage } from "./message.ts";
-import { threadName } from "./utils.ts";
 
 export class GameForum {
   readonly #channel: ForumChannel;

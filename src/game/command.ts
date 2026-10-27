@@ -3,9 +3,9 @@ import { InteractionContextType, MessageFlags, SlashCommandBuilder, channelMenti
 
 import { UserError } from "#core/errors";
 import type { Command } from "#core/types";
-import { GameForum } from "#game/forum";
 import { MAX_SIZE, MIN_SIZE } from "#minesweeper/constants";
 
+import { GameForum } from "./forum.ts";
 import { GameMessage } from "./message.ts";
 import { createOptionsSchema } from "./schemas.ts";
 import { updateGame } from "./service.ts";

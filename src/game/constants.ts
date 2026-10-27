@@ -1,16 +1,6 @@
-import { Colors, MessageMentions } from "discord.js";
+import { Colors } from "discord.js";
 
-import { encodeCustomId } from "#core/custom-id";
 import type { Status } from "#minesweeper/types";
-
-export const BUTTON_PREFIX = "game";
-export const BUTTON_PLACEHOLDER_ID = encodeCustomId(BUTTON_PREFIX, "none");
-export const SEALED_PREFIX = "🔒";
-export const STORE_CAPACITY = 512;
-
-export const TITLE_PATTERN = /^Saper (?<cols>\d+)x(?<rows>\d+)(?<ranked> RANKED)?$/;
-export const FOOTER_PATTERN = /^Bomby: (?<bombs>\d+) • Seed: (?<seed>\S+)$/;
-export const MENTION_PATTERN = new RegExp(MessageMentions.UsersPattern, "g");
 
 export const Emoji = {
   frame: "🟦",
@@ -53,3 +43,7 @@ export const STATUS_COLORS: Record<Status, number> = {
   won: Colors.Green,
   lost: Colors.Red,
 };
+
+export function threadName(username: string): string {
+  return `Plansza użytkownika ${username}`;
+}
